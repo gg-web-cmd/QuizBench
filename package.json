@@ -1,0 +1,22 @@
+{
+  "name": "quiz-bench",
+  "version": "1.0.0",
+  "private": true,
+  "description": "화면에 띄운 문제를 여러 AI에게 동시에 풀리고, 정답지와 대조해 AI별 정답률을 재는 로컬 웹 도구",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "build": "node build.js",
+    "selftest": "node server.js --selftest"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.72.0",
+    "@google/genai": "^1.30.0",
+    "openai": "^6.10.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.1",
+    "postject": "^1.0.0-alpha.6",
+    "rcedit": "^5.0.2"
+  }
+}

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>문제풀이도구 — AI 문제 풀이 실력 재기</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <span class="logo">AI</span>
+    <div>
+      <h1>문제풀이도구</h1>
+      <p class="sub">화면의 문제를 여러 AI 에게 한꺼번에 풀리고, 정답지와 대조합니다</p>
+    </div>
+  </div>
+  <div class="topbtns">
+    <button id="btn-theme" class="ghost" title="밝게/어둡게">◐</button>
+    <button id="btn-folder" class="ghost">저장 폴더 열기</button>
+    <button id="btn-quit" class="ghost">끝내기</button>
+  </div>
+</div>
+
+<main>
+
+  <!-- ── 1단계 ─────────────────────────────────────────── -->
+  <section class="card" id="step-window">
+    <div class="cardhead">
+      <span class="num">1</span>
+      <div>
+        <h2>문제를 어디서 가져올까요?</h2>
+        <p class="hint">열려 있는 창을 찍거나, 파일을 그대로 올리면 됩니다.</p>
+      </div>
+    </div>
+
+    <div class="tabs" id="src-tabs">
+      <button class="srctab on" data-src="win">열린 창 찍기</button>
+      <button class="srctab" data-src="file">파일 올리기</button>
+    </div>
+
+    <!-- 창 찍기 -->
+    <div id="src-win">
+      <div class="row">
+        <select id="win-list" class="grow"><option value="">— 창 목록을 불러오세요 —</option></select>
+        <button id="btn-wins" class="ghost">목록 새로 고침</button>
+        <button id="btn-shot" class="primary">이 창 찍기</button>
+      </div>
+
+      <div class="row small wrap">
+        <label class="check"><input type="checkbox" id="scroll"> <b>끝까지 굴려 내리며</b> 찍기</label>
+        <label>최대 <input id="max-pages" type="number" min="1" max="30" step="1" class="tiny"> 장</label>
+        <span class="spacer"></span>
+        <label class="check"><input type="checkbox" id="use-screen"> 창 대신 <b>화면 전체</b></label>
+      </div>
+
+      <div class="row small wrap">
+        <label>폭이 넘칠 때
+          <select id="wide">
+            <option value="fit">배율을 줄여 맞추기 (권장)</option>
+            <option value="side">옆으로도 찍기</option>
+            <option value="off">그냥 두기</option>
+          </select>
+        </label>
+        <span class="muted">오른쪽이 잘려 나오면 이걸 바꿔 보세요</span>
+      </div>
+    </div>
+
+    <!-- 파일 올리기 -->
+    <div id="src-file" class="hidden">
+      <div class="droparea" id="drop">
+        <button id="btn-upload" class="primary big">파일 고르기</button>
+        <p class="hint">여기로 <b>끌어다 놓아도</b> 됩니다</p>
+        <p class="hint">
+          사진(jpg·png) · <b>PDF</b> · 한글(hwp·hwpx) · 워드(docx) · 엑셀·파워포인트 · 텍스트
+        </p>
+        <input type="file" id="file-input" class="hidden">
+      </div>
+      <p class="hint" id="upload-note"></p>
+    </div>
+
+    <div class="row small">
+      <span id="shot-info" class="muted"></span>
+    </div>
+
+    <!-- 글자로 뽑아 온 문서 -->
+    <div id="paper-wrap" class="paperwrap hidden">
+      <div class="row small">
+        <b id="paper-name"></b>
+        <span id="paper-info" class="muted"></span>
+        <span class="spacer"></span>
+        <button id="btn-clear-upload" class="link">치우기</button>
+      </div>
+      <pre id="paper-sample" class="papersample"></pre>
+      <p class="hint">
+        이 문서는 <b>글자로</b> 갑니다 — 그림이 아니라서 그래프·도형 문제는 AI 가 못 봅니다.
+        그림까지 보이려면 PDF 나 사진으로 올려 주세요.
+      </p>
+    </div>
+
+    <div id="shot-wrap" class="shotwrap hidden">
+      <div id="page-tabs" class="pagetabs hidden"></div>
+      <div class="shotbox" id="shot-box">
+        <img id="shot-img" alt="찍은 화면">
+        <div id="sel-box" class="selbox hidden"></div>
+      </div>
+      <p class="hint" id="shot-hint">
+        문제만 골라 보내려면 그림 위에서 <b>마우스로 끌어</b> 네모를 그리세요.
+        <button id="btn-clear-sel" class="link">전체로 되돌리기</button>
+      </p>
+    </div>
+  </section>
+
+  <!-- ── 2단계 ─────────────────────────────────────────── -->
+  <section class="card" id="step-ai">
+    <div class="cardhead">
+      <span class="num">2</span>
+      <div>
+        <h2>어떤 AI 에게 물어볼까요?</h2>
+        <p class="hint">
+          API 키는 <b>이 컴퓨터에만</b> 저장되고, 그 회사 말고 어디로도 가지 않습니다.
+          모든 AI 에게 <b>똑같은 그림과 똑같은 지시문</b>이 갑니다.
+        </p>
+      </div>
+    </div>
+
+    <div id="ai-list" class="ailist"></div>
+
+    <div class="row small wrap addrow">
+      <button id="btn-add-ai" class="ghost">+ AI 추가</button>
+      <span class="muted">같은 회사의 다른 모델도 따로 넣어 견줄 수 있습니다 (예: Opus 와 Sonnet)</span>
+      <span class="spacer"></span>
+      <button id="btn-reset-ai" class="link">처음 상태로</button>
+    </div>
+
+    <div id="add-form" class="addform hidden">
+      <select id="add-kind"></select>
+      <input id="add-label" type="text" placeholder="이름표 (예: Claude 빠른 것)" maxlength="24">
+      <input id="add-model" type="text" placeholder="모델 이름 (나중에 넣어도 됩니다)">
+      <input id="add-url" type="text" class="hidden" placeholder="주소 (예: https://내서버/v1)">
+      <button id="add-go" class="primary">넣기</button>
+      <button id="add-cancel" class="ghost">취소</button>
+    </div>
+
+    <div class="row small wrap">
+      <label class="check"><input type="checkbox" id="explain"> <b>해설도 받기</b></label>
+      <span class="muted">왜 그 답인지 함께 물어봅니다 — 표에서 답을 누르면 보입니다 (답만 받을 때보다 느리고 비쌉니다)</span>
+    </div>
+
+    <div class="row small wrap">
+      <label>같은 문제를 <select id="repeat">
+        <option value="1">한 번</option><option value="2">두 번</option>
+        <option value="3">세 번</option><option value="5">다섯 번</option>
+      </select> 물어보기</label>
+      <span class="muted">— 여러 번 물으면 답이 얼마나 일정한지 함께 봅니다</span>
+      <span class="spacer"></span>
+      <label>기다리는 시간 <input id="timeout" type="number" min="20" max="900" step="10" class="tiny"> 초</label>
+    </div>
+
+    <details class="prompt">
+      <summary>AI 에게 주는 지시문 보기·고치기</summary>
+      <textarea id="prompt" rows="10" spellcheck="false"></textarea>
+      <div class="row small">
+        <button id="btn-prompt-reset" class="ghost">처음 문구로</button>
+        <span class="muted">이 글은 모든 AI 에게 글자 하나까지 똑같이 갑니다.</span>
+      </div>
+    </details>
+
+    <div class="row runrow">
+      <button id="btn-run" class="primary big">문제 풀리기</button>
+      <button id="btn-stop" class="ghost hidden">멈추기</button>
+      <span id="run-note" class="muted"></span>
+    </div>
+
+    <div id="log" class="log hidden"></div>
+  </section>
+
+  <!-- ── 3단계 : AI 들이 뭐라고 답했나 ──────────────────── -->
+  <section class="card hidden" id="step-answers">
+    <div class="cardhead">
+      <span class="num">3</span>
+      <div>
+        <h2>AI 별 결과값</h2>
+        <p class="hint">정답지 없이도 누가 무엇이라고 답했는지 바로 볼 수 있습니다.</p>
+      </div>
+    </div>
+
+    <div id="ai-cards" class="summary"></div>
+    <p class="hint" id="table-tip"></p>
+    <div id="table-wrap" class="tablewrap"></div>
+  </section>
+
+  <!-- ── 4단계 : 채점 ──────────────────────────────────── -->
+  <section class="card hidden" id="step-result">
+    <div class="cardhead">
+      <span class="num">4</span>
+      <div>
+        <h2>답 맞춰 보기</h2>
+        <p class="hint">정답지를 넣으면 AI 별 정답률이 나오고, 위의 표에 맞음·틀림이 칠해집니다.</p>
+      </div>
+    </div>
+
+    <div class="keyrow">
+      <div class="grow">
+        <textarea id="answer-key" rows="5" spellcheck="false"
+          placeholder="정답지를 적어 주세요. 이런 모양을 모두 알아봅니다.&#10;&#10;1 3          ← 줄마다 번호와 답&#10;2. ④&#10;3 3|4        ← 둘 중 아무거나 맞음&#10;3,4,1,2,5    ← 번호 없이 답만 (1번부터)"></textarea>
+      </div>
+      <div class="keybtns">
+        <button id="btn-grade" class="primary">채점하기</button>
+        <label class="check"><input type="checkbox" id="loose"> 느슨하게<br><span class="muted tiny-t">정답이 답 안에 들어 있으면 맞음</span></label>
+        <button id="btn-export" class="ghost">CSV 로 저장</button>
+      </div>
+    </div>
+
+    <div id="summary" class="summary"></div>
+  </section>
+
+  <!-- ── 지난 기록 ─────────────────────────────────────── -->
+  <section class="card" id="step-history">
+    <div class="cardhead compact">
+      <div>
+        <h2>지난 기록</h2>
+        <p class="hint">돌린 결과는 이 컴퓨터에 남습니다. 필요 없는 것은 지우세요.</p>
+      </div>
+      <div class="row">
+        <button id="btn-runs" class="ghost">불러오기</button>
+        <button id="btn-clear-runs" class="ghost">몽땅 지우기</button>
+      </div>
+    </div>
+    <div id="runs" class="runs"></div>
+  </section>
+
+</main>
+
+<!-- 답을 누르면 열리는 해설 창 -->
+<div id="why-back" class="modalback hidden">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="why-title">
+    <div class="modalhead">
+      <h3 id="why-title">문항</h3>
+      <button id="why-close" class="ghost" aria-label="닫기">✕</button>
+    </div>
+    <div id="why-body" class="modalbody"></div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="/js/upload.js"></script>
+<script src="/js/app.js"></script>
+</body>
+</html>
